@@ -39,9 +39,10 @@ export function showMainWindow(baseUrl: string): void {
   if (mainWin == null || mainWin.isDestroyed()) {
     mainWin = new BrowserWindow(windowOptions(1280, 820))
     mainWin.on('closed', () => { mainWin = null })
-    mainWin.webContents.on('did-finish-load', () => {
-      const raw = mainWin?.getTitle() ?? ''
-      mainWin?.setTitle(raw.includes('DeepSeek') ? stripEngineBranding(raw) : appTitle())
+    // 页面标题的权威拦截点：SPA 任何时点改 document.title 都会被这里收编为品牌标题
+    mainWin.on('page-title-updated', (event, title) => {
+      event.preventDefault()
+      mainWin?.setTitle(title.includes('DeepSeek') ? stripEngineBranding(title) : appTitle())
     })
     mainWin.setTitle(appTitle())
   }
