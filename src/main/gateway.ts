@@ -37,7 +37,8 @@ export function createGateway(deps: GatewayDeps): Gateway {
       for (;;) {
         try {
           await deps.subscribeStream(path, frame => {
-            if (shouldForward(frame, openSessions)) deps.send('engine:frame', frame)
+            // 通道名与 preload bridge 监听一致（ef:frame）
+            if (shouldForward(frame, openSessions)) deps.send('ef:frame', frame)
           }, controller.signal)
           // 正常返回（流关闭）也进入重连
         } catch (err) {

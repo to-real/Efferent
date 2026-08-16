@@ -8,7 +8,9 @@ directories:
 
 files:
   - dist/**
-  - renderer/**
+  - renderer/error-page/**
+  - renderer/tasks/**
+  - plugins/workbench/dist/**
   - package.json
 
 asar: true

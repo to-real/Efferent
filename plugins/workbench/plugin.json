@@ -1,0 +1,7 @@
+{
+  "id": "workbench",
+  "name": "Efferent 工作台",
+  "version": "0.1.0",
+  "kind": "workbench",
+  "entry": "dist/index.html"
+}

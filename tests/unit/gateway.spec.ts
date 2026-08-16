@@ -55,7 +55,8 @@ describe('createGateway', () => {
     gw.subscribeSession('s1')
     f.emit(frame('session/event', { sessionId: 's1' }))
     expect(f.frames.length).toBe(1)
-    expect(f.frames[0]).toMatchObject({ channel: 'engine:frame' })
+    // 通道契约：gateway → preload bridge 监听 'ef:frame'（防回归：曾用 engine:frame 导致帧无人接收）
+    expect(f.frames[0]).toMatchObject({ channel: 'ef:frame' })
 
     gw.unsubscribeSession('s1')
     f.emit(frame('session/event', { sessionId: 's1' }))

@@ -34,6 +34,7 @@ export interface EngineProcess {
   start(): Promise<{ port: number; baseUrl: string }>
   stop(): Promise<void>
   state(): EngineState
+  currentUrl(): string | null
   onStateChange(cb: (state: EngineState) => void): () => void
 }
 
@@ -144,6 +145,7 @@ export function createEngineProcess(paths: EnginePaths, port: number, deps: Engi
     start,
     stop,
     state: () => state,
+    currentUrl: () => (state === 'healthy' ? `http://127.0.0.1:${port}` : null),
     onStateChange(cb) {
       listeners.add(cb)
       return () => { listeners.delete(cb) }
