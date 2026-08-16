@@ -9,6 +9,7 @@ import { pickFreePort, listenProbe } from './port-picker.js'
 import { createRealWindows } from './windows.js'
 import { createOrphanCleaner, realListProcesses, realTreeKill } from './orphan-cleaner.js'
 import { BRAND } from './branding.js'
+import { showSplash, hideSplash } from './splash.js'
 
 // ---------- 资源与数据目录 ----------
 
@@ -67,6 +68,7 @@ async function bootstrap(): Promise<void> {
   const deps: AppDeps = {
     engine,
     windows: createRealWindows(),
+    splash: { show: showSplash, hide: hideSplash },
     updater: {
       async checkAndNotify() {
         autoUpdater.autoDownload = true

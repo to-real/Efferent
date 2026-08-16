@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Efferent</title>
+  <style>
+    :root { color-scheme: light dark; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1e1e1e; color: #f0f0f0; }
+    }
+    .mark {
+      width: 56px;
+      height: 56px;
+      border: 3px solid #4d6bfe;
+      border-radius: 14px;
+      position: relative;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .mark::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      border-top: 3px solid #4d6bfe;
+      border-right: 3px solid #4d6bfe;
+      transform: translateY(-50%) rotate(45deg);
+    }
+    h1 { font-size: 26px; letter-spacing: 0.5px; }
+    p { font-size: 13px; opacity: 0.55; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.92); opacity: 0.7; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mark"></div>
+  <h1>Efferent</h1>
+  <p>Where cognition becomes action</p>
+</body>
+</html>

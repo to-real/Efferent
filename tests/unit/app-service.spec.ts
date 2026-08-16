@@ -24,6 +24,10 @@ function makeDeps(opts: { acquire?: boolean; startError?: Error } = {}) {
       focusMain: vi.fn(() => { order.push('focusMain') }),
     },
     updater: { checkAndNotify: vi.fn(async () => { order.push('updater') }) },
+    splash: {
+      show: vi.fn(() => { order.push('splash.show') }),
+      hide: vi.fn(() => { order.push('splash.hide') }),
+    },
     lock: {
       acquire: () => opts.acquire ?? true,
       onSecondInstance: cb => { secondInstanceCb = cb },
@@ -46,19 +50,28 @@ function makeDeps(opts: { acquire?: boolean; startError?: Error } = {}) {
 // ---------- 测试 ----------
 
 describe('createApp', () => {
-  it('启动顺序：锁→引擎→主窗口→更新（后台）', async () => {
+  it('启动顺序：splash→引擎→splash 隐藏→主窗口→更新（后台）', async () => {
     const { deps, order } = makeDeps()
     await createApp(deps).init()
     expect(order).toEqual([
+      'splash.show',
       'engine.start:1',
+      'splash.hide',
       'showMain:http://127.0.0.1:1',
       'updater',
     ])
   })
 
-  it('二次实例：不起引擎不开窗口，触发时聚焦', async () => {
+  it('引擎启动失败：splash 先隐藏再进错误页', async () => {
+    const { deps, order } = makeDeps({ startError: new Error('迟迟未就绪') })
+    await createApp(deps).init()
+    expect(order.indexOf('splash.hide')).toBeLessThan(order.indexOf('showError'))
+  })
+
+  it('二次实例：不起引擎不开窗不弹 splash，触发时聚焦', async () => {
     const { deps, engineStart, focusMain, secondInstance } = makeDeps({ acquire: false })
     await createApp(deps).init()
+    expect(deps.splash.show).not.toHaveBeenCalled()
     expect(engineStart).not.toHaveBeenCalled()
     secondInstance()
     expect(focusMain).toHaveBeenCalledTimes(1)
