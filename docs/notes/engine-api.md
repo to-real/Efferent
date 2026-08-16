@@ -7,7 +7,7 @@
 - 单一 HTTP 服务器，上行 RPC 走 `POST /api/<method>`：信封 `{type:'client-request', rpcId, method, payload}`，`method` 必须与路径段一致；响应 `{type:'server-response', rpcId, result:{ok, value|error}}`，业务错误也是 HTTP 200
 - **无鉴权**（无 token/Authorization）。信任围栏仅三点：Host 必须 loopback（127/8、localhost、[::1]）；`sec-fetch-site: cross-site` 拒绝；**不带 Origin 头则放行**——壳进程（Node fetch）天然满足，可直接调用
 - POST 需 `Content-Type: application/json`
-- 下行事件：`/api/events.mux`（全会话）与 `/api/events.host`（宿主级），WS 或 SSE 均可，**只下行**；v1 任务中心用 2s 轮询替代，后续可换 `host/session-status` 帧
+- 下行事件：`/api/events.mux`（全会话）与 `/api/events.host`（宿主级），**只下行**。**重要更正（2026-08-16 实测）**：线上 HTTP GET 被路由层 426 拒绝逼向 **WebSocket**（SSE 仅供引擎进程内 fetch 形态）——网关必须走 WS（Node 22+ 原生 WebSocket 可用，已实测）；帧信封 `{type:'server-request', rpcId, method, payload}`
 
 ## 会话查询（任务中心的数据源）
 
