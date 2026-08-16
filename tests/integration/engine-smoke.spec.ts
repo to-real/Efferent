@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { existsSync } from 'node:fs'
+import { existsSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import net from 'node:net'
 import { createEngineProcess, createRealEngineDeps } from '../../src/main/engine-process.js'
@@ -14,6 +14,9 @@ const PATHS = {
 }
 
 const staged = existsSync(PATHS.nodeExe) && existsSync(PATHS.engineEntry)
+
+// 冒烟数据目录自洁：残留的 profiles 会让引擎的符号链接修复逻辑报错
+if (staged) rmSync(PATHS.dshHome, { recursive: true, force: true })
 
 describe.skipIf(!staged)('真引擎冒烟（staged 运行时）', () => {
   it('启动→健康→boot 图→停止无残留', { timeout: 180_000 }, async () => {

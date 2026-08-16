@@ -2,6 +2,8 @@ import { BrowserWindow, ipcMain } from 'electron'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { AppWindowDeps } from './app-service.js'
+import { appTitle, stripEngineBranding } from './branding.js'
+import { setEngineBaseUrl } from './task-center.js'
 
 const here = fileURLToPath(new URL('.', import.meta.url))
 
@@ -31,11 +33,18 @@ function windowOptions(width: number, height: number) {
   }
 }
 
-/** 主窗口：加载引擎 URL。 */
+/** 主窗口：加载引擎 URL；标题品牌化（覆盖引擎自带标题，导航后重新覆盖）。 */
 export function showMainWindow(baseUrl: string): void {
+  setEngineBaseUrl(baseUrl)
   if (mainWin == null || mainWin.isDestroyed()) {
     mainWin = new BrowserWindow(windowOptions(1280, 820))
     mainWin.on('closed', () => { mainWin = null })
+    // 页面标题的权威拦截点：SPA 任何时点改 document.title 都会被这里收编为品牌标题
+    mainWin.on('page-title-updated', (event, title) => {
+      event.preventDefault()
+      mainWin?.setTitle(title.includes('DeepSeek') ? stripEngineBranding(title) : appTitle())
+    })
+    mainWin.setTitle(appTitle())
   }
   void mainWin.loadURL(baseUrl)
   mainWin.show()

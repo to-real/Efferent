@@ -6,9 +6,15 @@ export interface AppWindowDeps {
   focusMain(): void
 }
 
+export interface AppSplashDeps {
+  show(): void
+  hide(): void
+}
+
 export interface AppDeps {
   engine: Pick<EngineProcess, 'start' | 'stop' | 'onStateChange'>
   windows: AppWindowDeps
+  splash: AppSplashDeps
   updater: { checkAndNotify(): Promise<void> }
   lock: {
     acquire(): boolean
@@ -55,10 +61,13 @@ export function createApp(deps: AppDeps): App {
     }
     deps.lock.onSecondInstance(focusMain)
 
+    deps.splash.show()
     try {
       const { baseUrl } = await deps.engine.start()
+      deps.splash.hide()
       deps.windows.showMain(baseUrl)
     } catch (err) {
+      deps.splash.hide()
       deps.log(`引擎启动失败：${errorMessage(err)}`)
       deps.windows.showError(errorMessage(err), restart)
       return

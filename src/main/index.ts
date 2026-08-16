@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, Menu } from 'electron'
 // asar 内 CJS 互操作不支持具名导出（打包环境实测），须走默认导出解构
 import electronUpdaterPkg from 'electron-updater'
 const { autoUpdater } = electronUpdaterPkg
@@ -8,6 +8,9 @@ import { createEngineProcess, createRealEngineDeps } from './engine-process.js'
 import { pickFreePort, listenProbe } from './port-picker.js'
 import { createRealWindows } from './windows.js'
 import { createOrphanCleaner, realListProcesses, realTreeKill } from './orphan-cleaner.js'
+import { BRAND } from './branding.js'
+import { showSplash, hideSplash } from './splash.js'
+import { openTaskCenter } from './task-center.js'
 
 // ---------- 资源与数据目录 ----------
 
@@ -41,7 +44,26 @@ if (!gotLock) {
 // ---------- 装配 ----------
 // 新手引导（API Key / 工作区）完全交给 DSH 原生界面，壳不设门槛。
 
+// 关于面板（产品身份，无引擎字样）
+app.setAboutPanelOptions({
+  applicationName: BRAND.name,
+  applicationVersion: app.getVersion(),
+  version: app.getVersion(),
+  credits: `${BRAND.slogan} · MIT © 2026 Zhang Jingyuan`,
+})
+
+function installMenu(): void {
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    { label: '文件', submenu: [{ role: 'quit', label: '退出' }] },
+    { label: '查看', submenu: [
+      { label: '任务中心', accelerator: 'CmdOrCtrl+T', click: () => { openTaskCenter() } },
+    ] },
+    { label: '帮助', submenu: [{ role: 'about', label: `关于 ${BRAND.name}` }] },
+  ]))
+}
+
 async function bootstrap(): Promise<void> {
+  installMenu()
   const paths = enginePaths()
 
   // 断电/强杀残留的引擎进程：启动前清理（排除自身）
@@ -58,6 +80,7 @@ async function bootstrap(): Promise<void> {
   const deps: AppDeps = {
     engine,
     windows: createRealWindows(),
+    splash: { show: showSplash, hide: hideSplash },
     updater: {
       async checkAndNotify() {
         autoUpdater.autoDownload = true

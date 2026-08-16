@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>任务中心 · Efferent</title>
+  <style>
+    :root { color-scheme: light dark; --accent: #4d6bfe; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; background: #fafafa; color: #1a1a1a; padding: 18px 22px; }
+    @media (prefers-color-scheme: dark) { body { background: #1e1e1e; color: #f0f0f0; } }
+    h1 { font-size: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    h1 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; font-weight: 600; opacity: 0.55; padding: 8px 10px; border-bottom: 1px solid rgba(128,128,128,0.3); }
+    td { padding: 9px 10px; border-bottom: 1px solid rgba(128,128,128,0.15); }
+    tr.row { cursor: pointer; }
+    tr.row:hover { background: rgba(77,107,254,0.07); }
+    .running-badge { color: var(--accent); font-weight: 600; }
+    .idle-badge { opacity: 0.45; }
+    .empty { padding: 40px 0; text-align: center; opacity: 0.5; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  </style>
+</head>
+<body>
+  <h1><span class="dot"></span>任务中心</h1>
+  <table>
+    <thead>
+      <tr><th>会话</th><th>工作区</th><th>状态</th><th>最近活动</th></tr>
+    </thead>
+    <tbody id="rows">
+      <tr><td colspan="4" class="empty">正在连接引擎…</td></tr>
+    </tbody>
+  </table>
+  <script src="index.js"></script>
+</body>
+</html>
