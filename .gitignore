@@ -25,3 +25,4 @@ test-results/
 playwright-report/
 app-debug.log
 quit-trace.log
+verify-out.log

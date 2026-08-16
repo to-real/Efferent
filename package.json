@@ -8,14 +8,15 @@
   "main": "dist/main/index.js",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit && (ls scripts/*.ts >/dev/null 2>&1 && tsc -p tsconfig.scripts.json --noEmit || true)",
-    "build": "tsc -p tsconfig.json",
+    "build": "npm run build:app && tsc -p tsconfig.json",
     "test": "vitest run",
     "test:unit": "vitest run --exclude 'tests/integration/**' --exclude 'tests/e2e/**'",
     "test:integration": "vitest run tests/integration",
     "dev": "npm run build && electron dist/main/index.js --dev",
     "stage": "tsx scripts/stage-runtime.ts",
     "dist": "npm run build && npm run stage && electron-builder --win nsis",
-    "smoke:packaged": "playwright test tests/e2e"
+    "smoke:packaged": "playwright test tests/e2e",
+    "build:app": "cd plugins/workbench && npm install && npm run build"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",

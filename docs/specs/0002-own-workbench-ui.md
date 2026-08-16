@@ -83,3 +83,27 @@ renderer/app（React+Vite，构建产物打包进应用）
 ## Milestones
 
 M1 IPC 契约层 + 网关（RPC 扩全量 + 事件订阅转发，fixture 机制）→ M2 会话主视图+Composer（含行内审批）→ M3 任务侧栏整合 + 诊断模式菜单 → M4 v2.0 打包发布 → M5 计划面板等 v2.1
+
+## 插件架构（2026-08-16 决策增补）
+
+**决策：工作台 UI 本身是插件，不是内置件。** 依据：DSH 自己的 webui 就不是硬编码的——`dsh-web-app` 是 cordis 插件（把前端 dist 经 frontend-static 挂上服务器），前端侧另有 client-plugin 运行时（服务端下发 + HMR）。「一切皆插件」在 Efferent 的完整落地是：壳只做宿主，UI 与未来所有面板（终端、diff 审阅、浏览器预览）都以插件形式挂载。
+
+概念映射：
+
+| DSH 侧 | Efferent 侧 |
+|---|---|
+| cordis 容器（插件宿主） | Electron 壳（主进程 + preload） |
+| dsh-web-frontend（前端 dist） | plugins/workbench（第一个自带插件） |
+| client-plugin 运行时 | 桥 `window.efferent`（IPC→网关→/api） |
+| 各功能插件 | 终端面板、diff 审阅、浏览器预览、任务中心… |
+
+最小机制（本期）：
+
+1. **manifest**：`plugins/<id>/plugin.json` — `{ id, name, version, kind: 'workbench' | 'panel', entry }`；kind=workbench 独占主窗，panel 留给后续面板位协议
+2. **插件宿主** `src/main/plugin-host.ts`：目录扫描 + manifest 解析校验 + 入口绝对路径解析（纯函数，注入 fs 依赖可测）；装载动作由 windows 层执行
+3. **平移**：renderer/app → plugins/workbench，UI 代码零改动（它只跟桥说话，物理上已是准插件）
+
+## M2 调试记录（防回归）
+
+- gateway 转发通道名曾为 `engine:frame`，preload 监听 `ef:frame`——帧进无人通道；已统一 `ef:frame` 并加单测锁死
+- zustand 选择器 `transcripts.get(activeId)` 返回原地 mutate 的对象，`Object.is` 判等跳过重渲染——帧到 store 而 DOM 不更新；dispatch 折叠后必须给 transcript 换新引用

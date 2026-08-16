@@ -1,4 +1,4 @@
-import { app, Menu } from 'electron'
+import { app, Menu, ipcMain } from 'electron'
 // asar 内 CJS 互操作不支持具名导出（打包环境实测），须走默认导出解构
 import electronUpdaterPkg from 'electron-updater'
 const { autoUpdater } = electronUpdaterPkg
@@ -6,11 +6,15 @@ import { join } from 'node:path'
 import { createApp, type AppDeps } from './app-service.js'
 import { createEngineProcess, createRealEngineDeps } from './engine-process.js'
 import { pickFreePort, listenProbe } from './port-picker.js'
-import { createRealWindows } from './windows.js'
+import { createRealWindows, resolveWorkbench, sendToMainWindow } from './windows.js'
 import { createOrphanCleaner, realListProcesses, realTreeKill } from './orphan-cleaner.js'
 import { BRAND } from './branding.js'
 import { showSplash, hideSplash } from './splash.js'
 import { openTaskCenter } from './task-center.js'
+import { createGateway, type Gateway } from './gateway.js'
+import { subscribeEvents } from './event-stream.js'
+import { realPost } from './engine-api.js'
+import { mkdirSync } from 'node:fs'
 
 // ---------- 资源与数据目录 ----------
 
@@ -58,12 +62,47 @@ function installMenu(): void {
     { label: '查看', submenu: [
       { label: '任务中心', accelerator: 'CmdOrCtrl+T', click: () => { openTaskCenter() } },
     ] },
+    { label: '开发者', submenu: [
+      { label: '引擎诊断界面（自带 UI）', click: () => { openDiagnosticWindow() } },
+    ] },
     { label: '帮助', submenu: [{ role: 'about', label: `关于 ${BRAND.name}` }] },
   ]))
 }
 
+let currentBaseUrl: string | null = null
+let gatewayRef: Gateway | null = null
+
+/** 诊断模式：引擎自带 Web UI 的隐藏入口（默认产品界面为自研工作台）。 */
+function openDiagnosticWindow(): void {
+  if (currentBaseUrl == null) return
+  const { BrowserWindow } = require('electron') as typeof import('electron')
+  const win = new BrowserWindow({ width: 1280, height: 820, autoHideMenuBar: true })
+  void win.loadURL(currentBaseUrl)
+}
+
+function installGatewayIpc(): void {
+  ipcMain.handle('ef:rpc', (_e, method: string, payload: Record<string, unknown>) => {
+    if (gatewayRef == null) throw new Error('网关未就绪')
+    return gatewayRef.rpc(method, payload)
+  })
+  ipcMain.handle('ef:subscribe', (_e, sessionId: string) => {
+    gatewayRef?.subscribeSession(sessionId)
+  })
+  ipcMain.handle('ef:respond', async (_e, rpcId: string, value: unknown) => {
+    if (currentBaseUrl == null) throw new Error('引擎未就绪')
+    // 审批/提问应答：POST /api/respond，ClientResponse 信封，rpcId 回声原帧
+    return realPost(currentBaseUrl)('/api/respond', {
+      type: 'client-response',
+      rpcId,
+      result: { ok: true, value },
+    })
+  })
+}
+
 async function bootstrap(): Promise<void> {
   installMenu()
+  // 插件宿主装配先于窗口：主窗入口来自 plugins/（找不到 workbench 插件即启动失败）
+  await resolveWorkbench()
   const paths = enginePaths()
 
   // 断电/强杀残留的引擎进程：启动前清理（排除自身）
@@ -76,6 +115,11 @@ async function bootstrap(): Promise<void> {
 
   const port = await pickFreePort({ isFree: listenProbe() })
   const engine = createEngineProcess(paths, port, createRealEngineDeps())
+
+  // 默认工作区目录（引擎要求已存在）
+  const defaultWorkspaceDir = join(appDataDir(), 'workspace-default')
+  mkdirSync(defaultWorkspaceDir, { recursive: true })
+  process.env.EFFERENT_DEFAULT_WS = defaultWorkspaceDir
 
   const deps: AppDeps = {
     engine,
@@ -95,8 +139,22 @@ async function bootstrap(): Promise<void> {
     log: msg => { console.log(`[efferent] ${msg}`) },
   }
 
+  installGatewayIpc()
   const appService = createApp(deps)
   await appService.init()
+
+  // 引擎就绪：建立网关（RPC + 双流订阅），帧转发主窗口
+  const engineUrl = engine.currentUrl()
+  if (engineUrl != null) {
+    currentBaseUrl = engineUrl
+    gatewayRef = createGateway({
+      baseUrl: engineUrl,
+      post: realPost(engineUrl),
+      send: (channel, payload) => { sendToMainWindow(channel, payload) },
+      subscribeStream: (path, onFrame, signal) => subscribeEvents(engineUrl, path, onFrame, signal),
+    })
+    void gatewayRef.start()
+  }
 
   // 退出流程：先停引擎再退出
   let quitting = false
