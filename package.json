@@ -1,0 +1,32 @@
+{
+  "name": "efferent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Efferent — 开源开放的桌面 Agent 工作台（认知化为行动）",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit && (ls scripts/*.ts >/dev/null 2>&1 && tsc -p tsconfig.scripts.json --noEmit || true)",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude 'tests/integration/**' --exclude 'tests/e2e/**'",
+    "test:integration": "vitest run tests/integration",
+    "dev": "npm run build && electron dist/main/index.js --dev",
+    "stage": "tsx scripts/stage-runtime.ts",
+    "dist": "npm run build && npm run stage && electron-builder --win nsis",
+    "smoke:packaged": "playwright test tests/e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^22.20.0",
+    "electron": "43.4.0",
+    "electron-builder": "26.15.3",
+    "tsx": "^4.22.0",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  }
+}

@@ -1,0 +1,33 @@
+appId: io.github.to-real.efferent
+productName: Efferent
+copyright: Copyright (c) 2026 Zhang Jingyuan (to-real)
+
+directories:
+  output: release
+
+files:
+  - dist/**
+  - renderer/**
+  - package.json
+
+asar: true
+
+extraResources:
+  - from: resources
+    to: .
+
+afterPack: scripts/verify-packaged-runtime.cjs
+
+win:
+  target: nsis
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: ${productName}-${version}-${arch}-setup.${ext}
+
+publish:
+  provider: github
+  owner: to-real
+  repo: Efferent
+  releaseType: release

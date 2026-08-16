@@ -1,0 +1,27 @@
+# 依赖与构建产物
+node_modules/
+dist/
+out/
+release/
+
+# 运行时 staging（打包时生成）
+resources/
+
+# 日志与临时
+*.log
+.tmp/
+
+# 环境与密钥（永不提交）
+.env
+.env.*
+*.pem
+*.key
+
+# 编辑器
+.vscode/
+.idea/
+tests/.smoke-dsh-home/
+test-results/
+playwright-report/
+app-debug.log
+quit-trace.log
