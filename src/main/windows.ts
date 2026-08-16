@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { AppWindowDeps } from './app-service.js'
 import { appTitle, stripEngineBranding } from './branding.js'
+import { setEngineBaseUrl } from './task-center.js'
 
 const here = fileURLToPath(new URL('.', import.meta.url))
 
@@ -34,6 +35,7 @@ function windowOptions(width: number, height: number) {
 
 /** 主窗口：加载引擎 URL；标题品牌化（覆盖引擎自带标题，导航后重新覆盖）。 */
 export function showMainWindow(baseUrl: string): void {
+  setEngineBaseUrl(baseUrl)
   if (mainWin == null || mainWin.isDestroyed()) {
     mainWin = new BrowserWindow(windowOptions(1280, 820))
     mainWin.on('closed', () => { mainWin = null })

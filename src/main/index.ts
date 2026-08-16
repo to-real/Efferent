@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, Menu } from 'electron'
 // asar 内 CJS 互操作不支持具名导出（打包环境实测），须走默认导出解构
 import electronUpdaterPkg from 'electron-updater'
 const { autoUpdater } = electronUpdaterPkg
@@ -10,6 +10,7 @@ import { createRealWindows } from './windows.js'
 import { createOrphanCleaner, realListProcesses, realTreeKill } from './orphan-cleaner.js'
 import { BRAND } from './branding.js'
 import { showSplash, hideSplash } from './splash.js'
+import { openTaskCenter } from './task-center.js'
 
 // ---------- 资源与数据目录 ----------
 
@@ -51,7 +52,18 @@ app.setAboutPanelOptions({
   credits: `${BRAND.slogan} · MIT © 2026 Zhang Jingyuan`,
 })
 
+function installMenu(): void {
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    { label: '文件', submenu: [{ role: 'quit', label: '退出' }] },
+    { label: '查看', submenu: [
+      { label: '任务中心', accelerator: 'CmdOrCtrl+T', click: () => { openTaskCenter() } },
+    ] },
+    { label: '帮助', submenu: [{ role: 'about', label: `关于 ${BRAND.name}` }] },
+  ]))
+}
+
 async function bootstrap(): Promise<void> {
+  installMenu()
   const paths = enginePaths()
 
   // 断电/强杀残留的引擎进程：启动前清理（排除自身）

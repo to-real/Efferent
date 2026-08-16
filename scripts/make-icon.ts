@@ -6,7 +6,11 @@ import { createRequire } from 'node:module'
 import { join } from 'node:path'
 
 const engineRequire = createRequire(join(process.cwd(), 'resources', 'engine', 'node_modules', '@deepseek-ai', 'dsh', 'lib', 'bin.js'))
-const sharp = engineRequire('sharp') as typeof import('sharp')
+// 结构化最小类型（仓库不依赖 sharp 包，避免类型解析）
+type Sharpish = (src: string, opts?: { density?: number }) => {
+  resize(w: number, h: number): { png(): { toFile(p: string): Promise<unknown> } }
+}
+const sharp = engineRequire('sharp') as Sharpish
 
 const src = join(process.cwd(), 'assets', 'icon.svg')
 const out = join(process.cwd(), 'assets', 'icon.png')
