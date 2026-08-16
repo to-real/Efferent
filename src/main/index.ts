@@ -8,6 +8,7 @@ import { createEngineProcess, createRealEngineDeps } from './engine-process.js'
 import { pickFreePort, listenProbe } from './port-picker.js'
 import { createRealWindows } from './windows.js'
 import { createOrphanCleaner, realListProcesses, realTreeKill } from './orphan-cleaner.js'
+import { BRAND } from './branding.js'
 
 // ---------- 资源与数据目录 ----------
 
@@ -40,6 +41,14 @@ if (!gotLock) {
 
 // ---------- 装配 ----------
 // 新手引导（API Key / 工作区）完全交给 DSH 原生界面，壳不设门槛。
+
+// 关于面板（产品身份，无引擎字样）
+app.setAboutPanelOptions({
+  applicationName: BRAND.name,
+  applicationVersion: app.getVersion(),
+  version: app.getVersion(),
+  credits: `${BRAND.slogan} · MIT © 2026 Zhang Jingyuan`,
+})
 
 async function bootstrap(): Promise<void> {
   const paths = enginePaths()
