@@ -2,6 +2,7 @@ appId: io.github.to-real.efferent
 productName: Efferent
 copyright: Copyright (c) 2026 Zhang Jingyuan (to-real)
 
+icon: assets/icon.png
 directories:
   output: release
 

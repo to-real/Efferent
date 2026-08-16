@@ -1,0 +1,14 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Efferent 品牌图标：E 字的中横化作向右传出的箭头（传出神经——认知化为行动） -->
+  <rect width="512" height="512" rx="112" fill="#4d6bfe"/>
+  <!-- 左竖 -->
+  <rect x="128" y="140" width="36" height="232" rx="18" fill="#ffffff"/>
+  <!-- 上横 -->
+  <rect x="128" y="140" width="160" height="36" rx="18" fill="#ffffff"/>
+  <!-- 中横（传出臂） -->
+  <rect x="128" y="238" width="230" height="36" rx="18" fill="#ffffff"/>
+  <!-- 箭头头部 -->
+  <path d="M358 206 L424 256 L358 306 Z" fill="#ffffff"/>
+  <!-- 下横 -->
+  <rect x="128" y="336" width="160" height="36" rx="18" fill="#ffffff"/>
+</svg>
