@@ -50,17 +50,23 @@ renderer/app（React+Vite，构建产物打包进应用）
 - IPC 契约层（类型 + 客户端 + 事件转发）**独立成包**：CLI（SPEC-0003）直接复用（Q4 的顺序红利）
 - renderer 数据层支持 **fixture 传输**（注入预制帧）——UI 可离线开发与无 Key 测试（CI e2e 用）
 
-## 工作台面（参照 ZCode/Codex 拆解，分两批）
+## 工作台面（2026-08-16 证据驱动修订版，用户已确认）
 
-**v2.0 主线（产品脸的最小完整集）**
-1. **会话主视图**：流式对话、工具调用卡片（折叠/展开、输入输出）、行内审批与提问卡、错误呈现
-2. **Composer**：输入区、斜杠命令、模式/模型选择、排队指示
-3. **任务侧栏**：现任务中心的升级版（作为主界面左栏，实时事件驱动替代轮询）
+> 依据：三路竞品调研 + 四家功能矩阵（docs/research/matrix-alignment.md）+ DSH 四模式特性核实；完整分层见 docs/roadmap/features.md。
 
-**v2.1 紧随**
-4. **计划/目标面板**（goal API 现成）：计划审批 → 执行进度实时滚动（ZCode 的 Todo 面板形态）
-5. 会话历史搜索（session.search）
-6. （探察后定）diff 视图——依赖 attachment/fs 数据面事实
+**v2.0（P0，产品脸的最小完整集）**
+1. 会话主视图：流式对话（session/event 流）
+2. 工具调用卡片（折叠：输入/输出/耗时）
+3. **diff 渲染**（编辑类工具事件客户端推导——Codex/Claude 招牌能力，证据升入核心）
+4. 行内审批卡（approval 帧 + /api/respond 回传）
+5. 行内提问卡（question 帧）
+6. Composer：输入区/斜杠命令/排队指示
+7. **四模式选择器**（标准/PTC/极简/创造，agentPreset 花名册）+ 模型选择——竞品无的组合自由
+8. 任务侧栏（事件驱动升级）
+9. 诊断模式（自带 UI 隐藏入口，默认关）
+
+**v2.1（P1）**：内置终端（xterm+node-pty 壳层自建）· 预览浏览器窗格（BrowserView）· 计划/目标面板（goal RPC）· diff 行内评论 · 历史搜索
+**v2.2+（P2/P3）**：自动化面板 · 语音 · MCP · 插件市场 · Agent 组合器（创造模式产品化）· Code Mode 工作面 · 子代理视图 · CLI（SPEC-0003）
 
 ## Testing Decisions
 
